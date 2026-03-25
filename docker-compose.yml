@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  server:
+    image: ${DOCKER_USERNAME:-yourusername}/shopsmart-server:latest
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - DATABASE_URL=file:./dev.db
+      - JWT_SECRET=supersafesecret_shopsmart_2026
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    restart: always
+
+  client:
+    image: ${DOCKER_USERNAME:-yourusername}/shopsmart-client:latest
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    restart: always
