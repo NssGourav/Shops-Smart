@@ -1,34 +1,42 @@
 import { useState, useEffect } from 'react'
+import './index.css'
 
 function App() {
-    const [data, setData] = useState(null);
+    const [status, setStatus] = useState(null)
 
     useEffect(() => {
-        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const apiUrl = import.meta.env.VITE_API_URL || ''
         fetch(`${apiUrl}/api/health`)
             .then(res => res.json())
-            .then(data => setData(data))
-            .catch(err => console.error('Error fetching health check:', err));
-    }, []);
+            .then(data => setStatus(data.status))
+            .catch(() => setStatus('offline'))
+    }, [])
 
     return (
-        <div className="container">
-            <h1>ShopSmart</h1>
-            <div className="card">
-                <h2>Backend Status</h2>
-                {data ? (
-                    <div>
-                        <p>Status: <span className="status-ok">{data.status}</span></p>
-                        <p>Message: {data.message}</p>
-                        <p>Timestamp: {data.timestamp}</p>
-                    </div>
-                ) : (
-                    <p>Loading backend status...</p>
-                )}
-            </div>
-            <p className="hint">
-                Edit <code>src/App.jsx</code> and save to test HMR
-            </p>
+        <div className="app-wrapper">
+            <nav className="navbar container">
+                <a href="/" className="brand-logo">Luxe<span>Spirit</span></a>
+                <div className="nav-links">
+                    <a href="#" className="nav-link">New Arrivals</a>
+                    <a href="#" className="nav-link">Collections</a>
+                    <a href="#" className="nav-link">Cart (0)</a>
+                </div>
+            </nav>
+
+            <main className="hero">
+                <h1 className="hero-title">Redefining Elegance</h1>
+                <p className="hero-subtitle">
+                    Discover our premium collection of modern fashion, crafted with uncompromising quality and minimalist aesthetics.
+                </p>
+                <button className="btn-primary">Shop the Collection</button>
+            </main>
+
+            {/* Hidden debug info for the backend status if needed, or just console */}
+            {status !== 'ok' && (
+                <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', opacity: 0.5, fontSize: '0.8rem' }}>
+                    Backend: {status || 'checking...'}
+                </div>
+            )}
         </div>
     )
 }
