@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './index.css'
+import ProductGrid from './components/ProductGrid'
 
 function App() {
     const [status, setStatus] = useState(null)
@@ -30,6 +31,8 @@ function App() {
                 </p>
                 <button className="btn-primary">Shop the Collection</button>
             </main>
+
+            <ProductGrid />
 
             {/* Hidden debug info for the backend status if needed, or just console */}
             {status !== 'ok' && (
