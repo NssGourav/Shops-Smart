@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import './index.css'
 import ProductGrid from './components/ProductGrid'
+import { useCart } from './context/CartContext'
 
 function App() {
     const [status, setStatus] = useState(null)
+    const { totalItems } = useCart()
 
     useEffect(() => {
         const apiUrl = import.meta.env.VITE_API_URL || ''
@@ -20,7 +22,7 @@ function App() {
                 <div className="nav-links">
                     <a href="#" className="nav-link">New Arrivals</a>
                     <a href="#" className="nav-link">Collections</a>
-                    <a href="#" className="nav-link">Cart (0)</a>
+                    <a href="#" className="nav-link">Cart ({totalItems})</a>
                 </div>
             </nav>
 
