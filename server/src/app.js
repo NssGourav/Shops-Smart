@@ -27,7 +27,7 @@ app.get('/api/health', (req, res) => {
 
 // Root Route
 app.get('/', (req, res) => {
-  res.send('ShopSmart Backend Service Updated with Prisma & REST Endpoints');
+  res.send('ShopSmart Backend Service Updated with MongoDB REST Endpoints');
 });
 
 module.exports = app;
