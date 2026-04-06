@@ -1,6 +1,7 @@
 const express = require('express');
-const prisma = require('../utils/prisma');
-const { auth, admin } = require('../middlewares/auth');
+const Cart = require('../models/Cart');
+const Order = require('../models/Order');
+const { auth } = require('../middlewares/auth');
 
 const router = express.Router();
 
@@ -10,11 +11,7 @@ router.post('/', auth, async (req, res) => {
   const { paymentMethod } = req.body;
 
   try {
-    // 1. Get cart items
-    const cart = await prisma.cart.findUnique({
-      where: { userId: req.user.id },
-      include: { items: { include: { product: true } } },
-    });
+    const cart = await Cart.findOne({ userId: req.user.id }).populate('items.product');
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ error: 'Cart is empty' });
@@ -26,32 +23,26 @@ router.post('/', auth, async (req, res) => {
       0
     );
 
-    // 3. Create order
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
       quantity: item.quantity,
       price: item.product.price,
     }));
 
-    const order = await prisma.order.create({
-      data: {
-        userId: req.user.id,
-        totalAmount,
-        status: 'PAID', // Simulating successful payment
-        items: { create: orderItems },
-        payment: {
-          create: {
-            method: paymentMethod || 'CREDIT_CARD',
-            status: 'SUCCESS',
-            transactionId: `txn_${Date.now()}`,
-          },
-        },
+    const order = await Order.create({
+      userId: req.user.id,
+      totalAmount,
+      status: 'PAID',
+      items: orderItems,
+      payment: {
+        method: paymentMethod || 'CREDIT_CARD',
+        status: 'SUCCESS',
+        transactionId: `txn_${Date.now()}`,
       },
-      include: { items: true, payment: true },
     });
 
-    // 4. Clear cart
-    await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+    cart.items = [];
+    await cart.save();
 
     res.status(201).json(order);
   } catch (err) {
@@ -64,11 +55,9 @@ router.post('/', auth, async (req, res) => {
 // @desc    Get current user's orders
 router.get('/', auth, async (req, res) => {
   try {
-    const orders = await prisma.order.findMany({
-      where: { userId: req.user.id },
-      include: { items: { include: { product: true } } },
-      orderBy: { createdAt: 'desc' },
-    });
+    const orders = await Order.find({ userId: req.user.id })
+      .populate('items.product')
+      .sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     console.error(err.message);

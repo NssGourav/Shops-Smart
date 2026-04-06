@@ -1,6 +1,5 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
-const prisma = require('../utils/prisma');
+const Product = require('../models/Product');
 const { auth, admin } = require('../middlewares/auth');
 
 const router = express.Router();
@@ -9,10 +8,7 @@ const router = express.Router();
 // @desc    Get all products
 router.get('/', async (req, res) => {
   try {
-    const products = await prisma.product.findMany({
-      include: { category: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    const products = await Product.find().populate('category').sort({ createdAt: -1 });
     res.json(products);
   } catch (err) {
     console.error(err.message);
@@ -24,10 +20,7 @@ router.get('/', async (req, res) => {
 // @desc    Get product by ID
 router.get('/:id', async (req, res) => {
   try {
-    const product = await prisma.product.findUnique({
-      where: { id: req.params.id },
-      include: { category: true },
-    });
+    const product = await Product.findById(req.params.id).populate('category');
     if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json(product);
   } catch (err) {
@@ -45,8 +38,13 @@ router.post(
     const { name, description, price, stock, imageUrl, categoryId } = req.body;
 
     try {
-      const product = await prisma.product.create({
-        data: { name, description, price: parseFloat(price), stock: parseInt(stock), imageUrl, categoryId },
+      const product = await Product.create({
+        name,
+        description,
+        price: parseFloat(price),
+        stock: parseInt(stock, 10),
+        imageUrl,
+        categoryId,
       });
       res.status(201).json(product);
     } catch (err) {
@@ -62,10 +60,12 @@ router.put('/:id', [auth, admin], async (req, res) => {
   const { name, description, price, stock, imageUrl, categoryId } = req.body;
 
   try {
-    const product = await prisma.product.update({
-      where: { id: req.params.id },
-      data: { name, description, price, stock, imageUrl, categoryId },
-    });
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { name, description, price, stock, imageUrl, categoryId },
+      { new: true, runValidators: true }
+    );
+    if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json(product);
   } catch (err) {
     console.error(err.message);
@@ -77,7 +77,8 @@ router.put('/:id', [auth, admin], async (req, res) => {
 // @desc    Delete a product (Admin only)
 router.delete('/:id', [auth, admin], async (req, res) => {
   try {
-    await prisma.product.delete({ where: { id: req.params.id } });
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json({ message: 'Product removed' });
   } catch (err) {
     console.error(err.message);

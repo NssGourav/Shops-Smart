@@ -1,5 +1,5 @@
 const express = require('express');
-const prisma = require('../utils/prisma');
+const Cart = require('../models/Cart');
 const { auth } = require('../middlewares/auth');
 
 const router = express.Router();
@@ -8,15 +8,10 @@ const router = express.Router();
 // @desc    Get current user's cart
 router.get('/', auth, async (req, res) => {
   try {
-    let cart = await prisma.cart.findUnique({
-      where: { userId: req.user.id },
-      include: { items: { include: { product: true } } },
-    });
+    let cart = await Cart.findOne({ userId: req.user.id }).populate('items.product');
     if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId: req.user.id },
-        include: { items: { include: { product: true } } },
-      });
+      cart = await Cart.create({ userId: req.user.id });
+      cart = await Cart.findById(cart.id).populate('items.product');
     }
     res.json(cart);
   } catch (err) {
@@ -31,27 +26,25 @@ router.post('/', auth, async (req, res) => {
   const { productId, quantity } = req.body;
 
   try {
-    // 1. Get or create cart
-    let cart = await prisma.cart.findUnique({ where: { userId: req.user.id } });
-    if (!cart) cart = await prisma.cart.create({ data: { userId: req.user.id } });
+    let cart = await Cart.findOne({ userId: req.user.id });
+    if (!cart) cart = await Cart.create({ userId: req.user.id });
 
-    // 2. Check if item exists in cart
-    const existingItem = await prisma.cartItem.findFirst({
-      where: { cartId: cart.id, productId },
-    });
+    const existingItem = cart.items.find((item) => item.productId.toString() === productId);
+    const nextQuantity = quantity || 1;
 
     if (existingItem) {
-      const updatedItem = await prisma.cartItem.update({
-        where: { id: existingItem.id },
-        data: { quantity: existingItem.quantity + (quantity || 1) },
-      });
-      res.json(updatedItem);
+      existingItem.quantity += nextQuantity;
     } else {
-      const newItem = await prisma.cartItem.create({
-        data: { cartId: cart.id, productId, quantity: quantity || 1 },
+      cart.items.push({
+        productId,
+        quantity: nextQuantity,
       });
-      res.status(201).json(newItem);
     }
+
+    await cart.save();
+    await cart.populate('items.product');
+
+    res.status(existingItem ? 200 : 201).json(cart);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -63,9 +56,12 @@ router.post('/', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   const { id } = req.params;
   try {
-    await prisma.cartItem.delete({
-      where: { id },
-    });
+    const cart = await Cart.findOne({ userId: req.user.id });
+    if (!cart) return res.status(404).json({ error: 'Cart not found' });
+
+    cart.items = cart.items.filter((item) => item.id !== id);
+    await cart.save();
+
     res.json({ message: 'Item removed from cart' });
   } catch (err) {
     console.error(err.message);
