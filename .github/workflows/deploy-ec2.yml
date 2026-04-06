@@ -1,0 +1,42 @@
+name: Deploy To EC2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run deployment script on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            export APP_DIR="${{ secrets.EC2_APP_DIR }}"
+            export BRANCH="main"
+            export REPO_URL="https://github.com/${{ github.repository }}.git"
+            mkdir -p "$APP_DIR"
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone "$REPO_URL" "$APP_DIR"
+            fi
+            git -C "$APP_DIR" fetch origin
+            git -C "$APP_DIR" checkout "$BRANCH"
+            git -C "$APP_DIR" reset --hard "origin/$BRANCH"
+            npm --prefix "$APP_DIR/server" ci
+            npm --prefix "$APP_DIR/server" run db:push
+            if command -v pm2 >/dev/null 2>&1; then
+              pm2 describe shopsmart-backend >/dev/null 2>&1 \
+                && pm2 restart shopsmart-backend --update-env \
+                || pm2 start "$APP_DIR/server/src/index.js" --name shopsmart-backend --update-env
+            else
+              echo "pm2 not found; start the backend manually after deployment."
+            fi

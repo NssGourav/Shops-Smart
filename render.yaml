@@ -3,11 +3,13 @@ services:
     name: shopsmart-backend
     env: node
     plan: free
-    buildCommand: cd server && npm install && npx prisma generate
+    buildCommand: cd server && npm install
     startCommand: cd server && npm start
     envVars:
       - key: PORT
         value: 10000
+      - key: DATABASE_URL
+        sync: false
       - key: JWT_SECRET
         generateValue: true
 
