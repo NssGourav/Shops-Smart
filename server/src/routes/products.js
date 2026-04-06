@@ -8,7 +8,9 @@ const router = express.Router();
 // @desc    Get all products
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find().populate('category').sort({ createdAt: -1 });
+    const products = await Product.find()
+      .populate('category')
+      .sort({ createdAt: -1 });
     res.json(products);
   } catch (err) {
     console.error(err.message);
@@ -31,28 +33,24 @@ router.get('/:id', async (req, res) => {
 
 // @route   POST /api/products
 // @desc    Add a product (Admin only)
-router.post(
-  '/',
-  [auth, admin],
-  async (req, res) => {
-    const { name, description, price, stock, imageUrl, categoryId } = req.body;
+router.post('/', [auth, admin], async (req, res) => {
+  const { name, description, price, stock, imageUrl, categoryId } = req.body;
 
-    try {
-      const product = await Product.create({
-        name,
-        description,
-        price: parseFloat(price),
-        stock: parseInt(stock, 10),
-        imageUrl,
-        categoryId,
-      });
-      res.status(201).json(product);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ error: 'Failed to create product' });
-    }
+  try {
+    const product = await Product.create({
+      name,
+      description,
+      price: parseFloat(price),
+      stock: parseInt(stock, 10),
+      imageUrl,
+      categoryId,
+    });
+    res.status(201).json(product);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Failed to create product' });
   }
-);
+});
 
 // @route   PUT /api/products/:id
 // @desc    Update a product (Admin only)

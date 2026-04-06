@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-primary:
+    'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --bg-primary: #0a0a0a;
   --bg-secondary: #141414;
@@ -101,7 +102,11 @@ h6 {
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  background: radial-gradient(
+    circle at center,
+    var(--bg-secondary) 0%,
+    var(--bg-primary) 100%
+  );
   position: relative;
   overflow: hidden;
 }

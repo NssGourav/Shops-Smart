@@ -8,7 +8,9 @@ const router = express.Router();
 // @desc    Get current user's cart
 router.get('/', auth, async (req, res) => {
   try {
-    let cart = await Cart.findOne({ userId: req.user.id }).populate('items.product');
+    let cart = await Cart.findOne({ userId: req.user.id }).populate(
+      'items.product'
+    );
     if (!cart) {
       cart = await Cart.create({ userId: req.user.id });
       cart = await Cart.findById(cart.id).populate('items.product');
@@ -29,7 +31,9 @@ router.post('/', auth, async (req, res) => {
     let cart = await Cart.findOne({ userId: req.user.id });
     if (!cart) cart = await Cart.create({ userId: req.user.id });
 
-    const existingItem = cart.items.find((item) => item.productId.toString() === productId);
+    const existingItem = cart.items.find(
+      (item) => item.productId.toString() === productId
+    );
     const nextQuantity = quantity || 1;
 
     if (existingItem) {

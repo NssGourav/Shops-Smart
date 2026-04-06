@@ -11,7 +11,9 @@ router.post('/', auth, async (req, res) => {
   const { paymentMethod } = req.body;
 
   try {
-    const cart = await Cart.findOne({ userId: req.user.id }).populate('items.product');
+    const cart = await Cart.findOne({ userId: req.user.id }).populate(
+      'items.product'
+    );
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ error: 'Cart is empty' });

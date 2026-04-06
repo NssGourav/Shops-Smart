@@ -26,7 +26,12 @@ cartItemSchema.virtual('product', {
 
 const cartSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true,
+    },
     items: { type: [cartItemSchema], default: [] },
   },
   baseSchemaOptions

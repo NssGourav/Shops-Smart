@@ -7,7 +7,10 @@ const Cart = require('../src/models/Cart');
 const Order = require('../src/models/Order');
 
 describe('Products API integration', () => {
-  const adminToken = jwt.sign({ id: 'admin-user', role: 'ADMIN' }, process.env.JWT_SECRET);
+  const adminToken = jwt.sign(
+    { id: 'admin-user', role: 'ADMIN' },
+    process.env.JWT_SECRET
+  );
 
   beforeEach(async () => {
     await Cart.deleteMany({});
@@ -39,7 +42,9 @@ describe('Products API integration', () => {
       stock: 5,
     });
 
-    const listResponse = await request(global.__TEST_APP__).get('/api/products');
+    const listResponse = await request(global.__TEST_APP__).get(
+      '/api/products'
+    );
 
     expect(listResponse.statusCode).toBe(200);
     expect(listResponse.body).toHaveLength(1);

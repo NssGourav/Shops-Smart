@@ -10,7 +10,12 @@ describe('App', () => {
       vi.fn((url) => {
         if (String(url).includes('/api/health')) {
           return Promise.resolve({
-            json: () => Promise.resolve({ status: 'ok', message: 'Test Msg', timestamp: 'now' }),
+            json: () =>
+              Promise.resolve({
+                status: 'ok',
+                message: 'Test Msg',
+                timestamp: 'now',
+              }),
             ok: true,
           });
         }

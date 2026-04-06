@@ -24,15 +24,19 @@ const ProductGrid = () => {
     fetchProducts();
   }, []);
 
-  if (loading) return <div className="loading-state">Loading latest collections...</div>;
+  if (loading)
+    return <div className="loading-state">Loading latest collections...</div>;
   if (error) return <div className="error-state">Error: {error}</div>;
-  if (products.length === 0) return <div className="empty-state">No products available at the moment.</div>;
+  if (products.length === 0)
+    return (
+      <div className="empty-state">No products available at the moment.</div>
+    );
 
   return (
     <section className="product-section container">
       <h2 className="section-title">Latest Arrivals</h2>
       <div className="product-grid">
-        {products.map(product => (
+        {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
