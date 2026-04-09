@@ -2,12 +2,9 @@ name: Deploy To EC2
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,7 +29,6 @@ jobs:
             git -C "$APP_DIR" checkout "$BRANCH"
             git -C "$APP_DIR" reset --hard "origin/$BRANCH"
             npm --prefix "$APP_DIR/server" ci
-            npm --prefix "$APP_DIR/server" run db:push
             if command -v pm2 >/dev/null 2>&1; then
               pm2 describe shopsmart-backend >/dev/null 2>&1 \
                 && pm2 restart shopsmart-backend --update-env \
