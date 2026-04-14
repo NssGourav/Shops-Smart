@@ -6,12 +6,12 @@
 - `server/` contains the Express API, Mongoose models, and tests.
 - MongoDB is used for persistence through Mongoose.
 - GitHub Actions handles continuous integration and optional EC2 deployment automation.
+- Docker Compose is used to run MongoDB, backend, and frontend together for local development.
 
 ## Workflow
 
 - Every push and pull request to `main` triggers `.github/workflows/ci.yml`.
 - The CI workflow installs dependencies, runs ESLint, performs a Prettier format check, executes tests, and builds the frontend.
-- `.github/dependabot.yml` checks npm and GitHub Actions dependencies weekly.
 - `.github/workflows/deploy-ec2.yml` can deploy to EC2 through SSH when the required GitHub secrets are configured.
 
 ## Testing Strategy
@@ -22,6 +22,15 @@
   The backend uses Supertest with Mongoose and MongoDB to validate API + database behavior together.
 - E2E testing:
   Not implemented yet, so this remains a bonus opportunity rather than a claimed capability.
+
+## Progress
+
+- Architecture and core implementation: completed
+- CI workflow and lint/test automation: completed
+- MongoDB migration and Mongoose integration: completed
+- Docker-based local environment: completed
+- Deployment automation: partially completed because it depends on external EC2 secrets and server setup
+- Bonus E2E testing: not completed
 
 ## Design Decisions
 

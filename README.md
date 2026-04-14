@@ -6,7 +6,18 @@ ShopSmart is a full-stack shopping application with a React frontend and an Expr
 
 - Frontend: React, Vite, Vitest, ESLint
 - Backend: Express, Mongoose, MongoDB, Jest, Supertest, ESLint
-- DevOps: GitHub Actions, Dependabot, Render configuration, EC2 deployment workflow
+- DevOps: GitHub Actions, Docker Compose, Render configuration, EC2 deployment workflow
+
+## Project Status
+
+- Core full-stack structure is completed.
+- Frontend UI, backend APIs, MongoDB integration, Docker setup, and CI are in place.
+- Main remaining gap is stronger backend test execution in restricted environments and optional bonus work like E2E testing.
+
+Estimated completion:
+- Overall project: about 80-85%
+- Core features and DevOps rubric items: about 85-90%
+- Production polish and bonus items: still pending
 
 ## Local Setup
 
@@ -50,7 +61,6 @@ npm test
 ## DevOps Evaluation Notes
 
 - CI pipeline: `.github/workflows/ci.yml`
-- Dependabot config: `.github/dependabot.yml`
 - EC2 deployment workflow: `.github/workflows/deploy-ec2.yml`
 - Idempotent deployment script: `scripts/deploy-ec2.sh`
 - Rubric explanation: `docs/devops-eval.md`
