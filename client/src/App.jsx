@@ -15,13 +15,29 @@ function App() {
       .catch(() => setStatus('offline'));
   }, []);
 
+  const backendStatusLabel =
+    status === 'ok' ? 'Online' : status === 'offline' ? 'Offline' : 'Checking';
+  const backendStatusClass =
+    status === 'ok'
+      ? 'status-chip--ok'
+      : status === 'offline'
+        ? 'status-chip--bad'
+        : 'status-chip--neutral';
+
   return (
     <div className="app-wrapper">
       <nav className="navbar container">
         <a href="/" className="brand-logo">
-          Luxe<span>Spirit</span>
+          Shop<span>Smart</span>
         </a>
         <div className="nav-links">
+          <span
+            className={`status-chip ${backendStatusClass}`}
+            aria-label={`Backend status: ${backendStatusLabel}`}
+            title={`Backend status: ${backendStatusLabel}`}
+          >
+            Backend: {backendStatusLabel}
+          </span>
           <a href="#" className="nav-link">
             New Arrivals
           </a>
@@ -44,21 +60,6 @@ function App() {
       </main>
 
       <ProductGrid />
-
-      {/* Hidden debug info for the backend status if needed, or just console */}
-      {status !== 'ok' && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '1rem',
-            right: '1rem',
-            opacity: 0.5,
-            fontSize: '0.8rem',
-          }}
-        >
-          Backend: {status || 'checking...'}
-        </div>
-      )}
     </div>
   );
 }

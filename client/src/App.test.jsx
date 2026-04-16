@@ -35,7 +35,7 @@ describe('App', () => {
 
     expect(
       await screen.findByRole('link', {
-        name: /Luxe\s*Spirit/i,
+        name: /Shop\s*Smart/i,
       })
     ).toBeInTheDocument();
     expect(await screen.findByText(/Redefining Elegance/i)).toBeInTheDocument();
