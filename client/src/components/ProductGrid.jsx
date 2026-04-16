@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
 
 const ProductGrid = () => {
@@ -15,7 +15,9 @@ const ProductGrid = () => {
         const data = await response.json();
         setProducts(data);
       } catch (err) {
-        setError(err.message);
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch products'
+        );
       } finally {
         setLoading(false);
       }

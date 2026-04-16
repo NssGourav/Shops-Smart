@@ -1,19 +1,24 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const CartContext = createContext();
+const STORAGE_KEY = 'shopsmart_cart';
+const LEGACY_STORAGE_KEY = 'luxespirit_cart';
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   // Initialize cart from localStorage if available, otherwise empty array
   const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('luxespirit_cart');
+    const savedCart =
+      localStorage.getItem(STORAGE_KEY) ||
+      localStorage.getItem(LEGACY_STORAGE_KEY);
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
   // Save cart to local storage whenever it changes
   useEffect(() => {
-    localStorage.setItem('luxespirit_cart', JSON.stringify(cart));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   }, [cart]);
 
   const addToCart = (product) => {

@@ -1,8 +1,11 @@
-import React from 'react';
 import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const priceNumber = Number(product?.price);
+  const formattedPrice = Number.isFinite(priceNumber)
+    ? priceNumber.toFixed(2)
+    : null;
 
   return (
     <div className="product-card">
@@ -21,7 +24,9 @@ const ProductCard = ({ product }) => {
         <p className="product-category">
           {product.category?.name || 'Category'}
         </p>
-        <p className="product-price">${product.price.toFixed(2)}</p>
+        <p className="product-price">
+          {formattedPrice ? `$${formattedPrice}` : 'Price N/A'}
+        </p>
       </div>
     </div>
   );
