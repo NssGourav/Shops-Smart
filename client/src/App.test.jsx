@@ -39,5 +39,6 @@ describe('App', () => {
       })
     ).toBeInTheDocument();
     expect(await screen.findByText(/Redefining Elegance/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Latest Arrivals/i)).toBeInTheDocument();
   });
 });
