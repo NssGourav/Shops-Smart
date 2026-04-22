@@ -4,25 +4,18 @@ import CartDrawer from './components/CartDrawer';
 import FiltersBar from './components/FiltersBar';
 import ProductGrid from './components/ProductGrid';
 import { useCart } from './context/CartContext';
+import demoProducts from './data/demoProducts';
 
 function App() {
   const [status, setStatus] = useState(null);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
-  const [productsError, setProductsError] = useState(null);
+  const [catalogMode, setCatalogMode] = useState('live');
   const [cartOpen, setCartOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [sort, setSort] = useState('newest');
   const { totalItems } = useCart();
-
-  useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || '';
-    fetch(`${apiUrl}/api/health`)
-      .then((res) => res.json())
-      .then((data) => setStatus(data.status))
-      .catch(() => setStatus('offline'));
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -31,17 +24,30 @@ function App() {
     async function run() {
       try {
         setProductsLoading(true);
-        setProductsError(null);
-        const response = await fetch(`${apiUrl}/api/products`);
-        if (!response.ok) throw new Error('Failed to fetch products');
-        const data = await response.json();
-        if (!cancelled) setProducts(Array.isArray(data) ? data : []);
-      } catch (error) {
+        const [healthResponse, productsResponse] = await Promise.all([
+          fetch(`${apiUrl}/api/health`),
+          fetch(`${apiUrl}/api/products`),
+        ]);
+
+        if (!healthResponse.ok || !productsResponse.ok) {
+          throw new Error('Failed to load live storefront data');
+        }
+
+        const [healthData, productsData] = await Promise.all([
+          healthResponse.json(),
+          productsResponse.json(),
+        ]);
+
         if (!cancelled) {
-          setProductsError(
-            error instanceof Error ? error.message : 'Failed to fetch products'
-          );
-          setProducts([]);
+          setStatus(healthData.status);
+          setProducts(Array.isArray(productsData) ? productsData : []);
+          setCatalogMode('live');
+        }
+      } catch {
+        if (!cancelled) {
+          setStatus('demo');
+          setProducts(demoProducts);
+          setCatalogMode('demo');
         }
       } finally {
         if (!cancelled) setProductsLoading(false);
@@ -55,13 +61,9 @@ function App() {
   }, []);
 
   const backendStatusLabel =
-    status === 'ok' ? 'Online' : status === 'offline' ? 'Offline' : 'Checking';
+    status === 'ok' ? 'Online' : status === 'demo' ? 'Demo' : 'Checking';
   const backendStatusClass =
-    status === 'ok'
-      ? 'status-chip--ok'
-      : status === 'offline'
-        ? 'status-chip--bad'
-        : 'status-chip--neutral';
+    status === 'ok' ? 'status-chip--ok' : 'status-chip--neutral';
 
   const categories = useMemo(() => {
     const unique = new Set();
@@ -89,13 +91,36 @@ function App() {
     }
 
     const sorted = [...next];
-    if (sort === 'price-asc') {
+    if (sort === 'newest') {
+      sorted.sort(
+        (a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0)
+      );
+    } else if (sort === 'price-asc') {
       sorted.sort((a, b) => Number(a?.price) - Number(b?.price));
     } else if (sort === 'price-desc') {
       sorted.sort((a, b) => Number(b?.price) - Number(a?.price));
     }
     return sorted;
   }, [products, category, query, sort]);
+
+  const showcaseStats = useMemo(() => {
+    const categoryCount = Math.max(categories.length - 1, 0);
+    const stockedUnits = products.reduce(
+      (total, product) => total + Number(product?.stock || 0),
+      0
+    );
+    const inventoryValue = products.reduce(
+      (total, product) =>
+        total + Number(product?.price || 0) * Number(product?.stock || 0),
+      0
+    );
+
+    return [
+      { label: 'Categories', value: categoryCount },
+      { label: 'Units', value: stockedUnits },
+      { label: 'Inventory', value: `$${inventoryValue.toFixed(0)}` },
+    ];
+  }, [categories.length, products]);
 
   return (
     <div className="app-wrapper">
@@ -159,11 +184,36 @@ function App() {
             <span className="hero-metric-value">Minimal</span>
           </div>
           <div className="hero-metric">
-            <span className="hero-metric-label">Theme</span>
-            <span className="hero-metric-value">Noir</span>
+            <span className="hero-metric-label">Stack</span>
+            <span className="hero-metric-value">MERN</span>
           </div>
         </div>
       </main>
+
+      <section className="insights container" aria-label="Store insights">
+        <div className="insights-panel">
+          <div className="insights-copy">
+            <p className="hero-kicker">Submission-ready experience</p>
+            <h2 className="insights-title">
+              Designed to work as a live product and as a hosted portfolio demo.
+            </h2>
+            <p className="insights-note">
+              When the backend is reachable, the catalog runs fully live. If a
+              static host is used, the storefront gracefully falls back to a
+              curated demo dataset so the UI still tells a complete story.
+            </p>
+          </div>
+
+          <div className="insights-grid">
+            {showcaseStats.map((item) => (
+              <article key={item.label} className="insight-card">
+                <span className="insight-label">{item.label}</span>
+                <strong className="insight-value">{item.value}</strong>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section id="catalog" className="catalog container">
         <div className="catalog-head">
@@ -174,6 +224,13 @@ function App() {
             </p>
           </div>
         </div>
+
+        {catalogMode === 'demo' ? (
+          <div className="demo-banner" role="status">
+            Demo mode is active. This keeps the hosted frontend showcase working
+            even when a backend API is not attached.
+          </div>
+        ) : null}
 
         <FiltersBar
           categories={categories}
@@ -188,7 +245,7 @@ function App() {
         <ProductGrid
           products={filteredProducts}
           loading={productsLoading}
-          error={productsError}
+          error={null}
         />
       </section>
 
