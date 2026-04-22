@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const baseSchemaOptions = {
   timestamps: true,
   toJSON: {
+    virtuals: true,
     transform: (_, ret) => {
       ret.id = ret._id.toString();
       delete ret._id;
@@ -11,6 +12,7 @@ const baseSchemaOptions = {
     },
   },
   toObject: {
+    virtuals: true,
     transform: (_, ret) => {
       ret.id = ret._id.toString();
       delete ret._id;

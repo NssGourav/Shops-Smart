@@ -18,7 +18,6 @@ beforeAll(async () => {
     process.env.DATABASE_URL = global.__MONGO_SERVER__.getUri();
   }
 
-  jest.resetModules();
   await connectToDatabase();
   global.__TEST_APP__ = require('../src/app');
 });
