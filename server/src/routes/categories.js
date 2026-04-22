@@ -1,31 +1,29 @@
 const express = require('express');
-const Category = require('../models/Category');
 const { auth, admin } = require('../middlewares/auth');
+const { categoryService } = require('../services');
+const asyncHandler = require('../utils/asyncHandler');
 
 const router = express.Router();
 
 // @route   GET /api/categories
 // @desc    Get all categories
-router.get('/', async (req, res) => {
-  try {
-    const categories = await Category.find().sort({ createdAt: -1 });
+router.get(
+  '/',
+  asyncHandler(async (req, res) => {
+    const categories = await categoryService.listCategories();
     res.json(categories);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-});
+  })
+);
 
 // @route   POST /api/categories
 // @desc    Add a category (Admin only)
-router.post('/', [auth, admin], async (req, res) => {
-  const { name } = req.body;
-  try {
-    const category = await Category.create({ name });
+router.post(
+  '/',
+  [auth, admin],
+  asyncHandler(async (req, res) => {
+    const category = await categoryService.createCategory(req.body);
     res.status(201).json(category);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create category' });
-  }
-});
+  })
+);
 
 module.exports = router;

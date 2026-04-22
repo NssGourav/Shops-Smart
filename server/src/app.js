@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const HttpError = require('./errors/HttpError');
 
 const app = express();
 
@@ -28,6 +29,17 @@ app.get('/api/health', (req, res) => {
 // Root Route
 app.get('/', (req, res) => {
   res.send('ShopSmart Backend Service Updated with MongoDB REST Endpoints');
+});
+
+app.use((err, req, res, _next) => {
+  void _next;
+
+  if (err instanceof HttpError) {
+    return res.status(err.statusCode).json({ error: err.message });
+  }
+
+  console.error(err.message);
+  return res.status(500).json({ error: 'Server Error' });
 });
 
 module.exports = app;
