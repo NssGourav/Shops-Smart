@@ -1,6 +1,6 @@
 # Use Case Diagram
 
-![SmartShop Use Case Diagram](./use_case_diagram.png)
+![ShopSmart Use Case Diagram](./use_case_diagram.png)
 
 <details>
 <summary>View Mermaid Code</summary>
@@ -11,13 +11,13 @@ useCaseDiagram
     actor Admin
     actor "Payment Gateway" as PG
 
-    package "SmartShop System" {
+    package "ShopSmart System" {
         usecase "Browse Products" as UC1
         usecase "Add to Cart" as UC2
         usecase "Checkout & Pay" as UC3
         usecase "Track Order" as UC4
-        usecase "Manage Products" as UC5
-        usecase "Manage Orders" as UC6
+        usecase "Manage Products & Categories" as UC5
+        usecase "View Orders" as UC6
         usecase "Process Payment" as UC7
     }
 

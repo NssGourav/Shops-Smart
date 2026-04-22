@@ -7,19 +7,15 @@
 
 ```mermaid
 erDiagram
+    USER ||--|| CART : owns
     USER ||--o{ ORDER : places
-    USER ||--o{ ADDRESS : has
-    USER ||--o{ CART : owns
+    CATEGORY ||--o{ PRODUCT : classifies
+    CART ||--o{ CART_ITEM : contains
+    ORDER ||--o{ ORDER_ITEM : includes
     
     PRODUCT ||--o{ CART_ITEM : "included in"
     PRODUCT ||--o{ ORDER_ITEM : "ordered as"
-    PRODUCT }|--|| CATEGORY : belongs_to
-    
-    CART ||--o{ CART_ITEM : contains
-    
-    ORDER ||--o{ ORDER_ITEM : includes
     ORDER ||--|| PAYMENT : "paid by"
-    ORDER ||--|| SHIPMENT : "fulfilled by"
 
     USER {
         string id PK
@@ -34,14 +30,18 @@ erDiagram
         string name
         string description
         float price
-        int stock_quantity
+        int stock
         string category_id FK
+    }
+
+    CATEGORY {
+        string id PK
+        string name
     }
 
     ORDER {
         string id PK
         string user_id FK
-        datetime order_date
         float total_amount
         string status
     }
@@ -59,9 +59,14 @@ erDiagram
         string user_id FK
     }
 
-    PAYMENT {
+    CART_ITEM {
         string id PK
-        string order_id FK
+        string cart_id FK
+        string product_id FK
+        int quantity
+    }
+
+    PAYMENT {
         string payment_method
         string status
         string transaction_id
