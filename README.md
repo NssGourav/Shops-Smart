@@ -41,6 +41,7 @@ Express + Mongoose backend backed by MongoDB.
 - Editorial, portfolio-style storefront
 - Responsive cart and filter system
 - Hosted-demo fallback for static deployment platforms
+- Frontend preview: [docs/frontend-preview.md](./docs/frontend-preview.md)
 
 ### Hosted Link
 
